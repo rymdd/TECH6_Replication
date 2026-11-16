@@ -1,0 +1,29 @@
+
+\begingroup
+\centering
+\begin{adjustbox}{max width=\textwidth}
+   \begin{tabular}{lccccccccc}
+      \tabularnewline \midrule \midrule
+      Dependent Variables: & \multicolumn{8}{c}{High school, men 15-20} & Enrolled, men 15-30\\
+      Model:                            & (1)     & (2)     & (3)     & (4)     & (5)         & (6)         & (7)         & (8)     & (9)\\  
+      \midrule
+      \emph{Variables}\\
+      Islamic mayor in 1994             & 0.004   & 0.009   & 0.007   & 0.010   & 0.015$^{*}$ & 0.011$^{*}$ & 0.015$^{*}$ & 0.019   & 0.014\\   
+                                        & (0.005) & (0.006) & (0.008) & (0.007) & (0.008)     & (0.006)     & (0.009)     & (0.012) & (0.009)\\   
+      Controls and province dummies     & No      & Yes     & No      & Yes     & Yes         & Yes         & Yes         & Yes     & Yes\\  
+      Polynomial in the margin          & None    & None    & Linear  & Linear  & Linear      & Linear      & Quadratic   & Cubic   & Linear\\  
+      Bandwidth                         & All     & All     & 0.323   & 0.323   & 0.162       & 0.646       & 0.323       & 0.323   & 0.230\\  
+      p-value, same effect as for women & 0.000   & 0.482   & 0.001   & 0.008   & 0.049       & 0.034       & 0.190       & 0.056   & 0.993\\  
+      \midrule
+      \emph{Fit statistics}\\
+      Observations                      & 2,629   & 2,629   & 1,342   & 1,342   & 747         & 2,584       & 1,342       & 1,342   & 993\\  
+      R$^2$                             & 0.000   & 0.407   & 0.001   & 0.433   & 0.473       & 0.408       & 0.434       & 0.434   & 0.411\\  
+      Dependent variable mean           & 0.192   & 0.192   & 0.194   & 0.194   & 0.195       & 0.193       & 0.194       & 0.194   & 0.197\\  
+      \midrule \midrule
+      \multicolumn{10}{l}{\emph{Clustered (province) standard-errors in parentheses}}\\
+      \multicolumn{10}{l}{\emph{Signif. Codes: ***: 0.01, **: 0.05, *: 0.1}}\\
+   \end{tabular}
+\end{adjustbox}
+\par\endgroup
+
+

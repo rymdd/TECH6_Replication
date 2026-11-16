@@ -1,0 +1,13 @@
+# Intermediate files written by the scripts
+data/derived/
+
+# R session files
+.Rhistory
+.RData
+.Rproj.user/
+
+# macOS
+.DS_Store
+
+# The write-up is submitted separately, not through this repository
+paper/
