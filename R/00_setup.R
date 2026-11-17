@@ -1,7 +1,7 @@
 library(tidyverse)
 library(haven)
 library(fixest)
-library(rddensity)
+library(rdd)
 library(patchwork)
 library(knitr)
 

@@ -15,7 +15,8 @@ and two extensions. Everything is in R, except the lasso in Extension B, which i
 1. Install the packages once:
 
    ```
-   Rscript -e 'install.packages(c("tidyverse", "haven", "fixest", "rddensity", "patchwork", "knitr"))'
+   Rscript -e 'install.packages(c("tidyverse", "haven", "fixest", "AER", "patchwork", "knitr"))'
+   Rscript -e 'install.packages("https://cran.r-project.org/src/contrib/Archive/rdd/rdd_0.57.tar.gz", repos = NULL, type = "source")'
    pip install -r requirements.txt
    ```
 
@@ -62,7 +63,7 @@ The table notes in the paper do not list household size among the controls or me
 
 - **Sample sizes and third decimals.** The bandwidths are the rounded values printed in the paper, so some windows hold one municipality more or fewer than the paper's (1,021 against 1,020 in the main window for women), and a few estimates differ in the third decimal.
 - **Table II, women = men.** The paper uses a different test. My p-values differ slightly; the conclusion at the main specification is the same.
-- **Figure 2 (b).** The density test is `rddensity` (from the course), not McCrary's test.
+- **Figure 2 (b).** Same test and sample as the paper (McCrary's test on the 2,543 municipalities with the women's outcome and \|`iwm94`\| < 0.6). The panel draws the two weighted lines that the test compares at the cutoff, in place of the paper's density estimate over the whole range.
 - **Figure 3.** Eight separate RD regressions, one per covariate, in place of the paper's joint test.
 - **Figures 3 and 4.** A straight line on each side of the cutoff, in place of the paper's local linear smoother. The bins and windows are the paper's.
 - **Table I.** No significance stars; the difference has its standard error.
@@ -75,7 +76,7 @@ The table notes in the paper do not list household size among the controls or me
 
 ## Software
 
-R 4.6.2 with fixest 0.14.2, rddensity 3.0, tidyverse 2.0.0, haven 2.5.5, patchwork 1.3.2 and knitr 1.52; Python 3.11 with pandas and scikit-learn. `output/session_info.txt` records the versions of the last run. The seed in `py/ext_b_lasso.py` fixes the cross-validation folds; nothing else is random.
+R 4.6.2 with fixest 0.14.2, rdd 0.57, tidyverse 2.0.0, haven 2.5.5, patchwork 1.3.2 and knitr 1.52; Python 3.11 with pandas and scikit-learn. `output/session_info.txt` records the versions of the last run. The seed in `py/ext_b_lasso.py` fixes the cross-validation folds; nothing else is random.
 
 ## Layout
 

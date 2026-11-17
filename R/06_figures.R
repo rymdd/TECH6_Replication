@@ -32,15 +32,29 @@ fig2a <- ggplot(raw, aes(iwm94)) +
   labs(title = "(a) Histogram", x = "Islamic win margin", y = "Percent") +
   theme_paper()
 
-# the paper uses the McCrary test, I use rddensity from the course instead (same idea, but the test statistic is not the same as in the paper)
-rdd <- rddensity(X = dat$iwm94, c = 0)
-fig2b <- rdplotdensity(rdd, X = dat$iwm94, noPlot = TRUE)$Estplot +
+# McCrary test with the sample of the do-file: municipalities with the women's outcome and |margin| < 0.6, default bin size and bandwidth
+x2 <- raw |>
+  filter(!is.na(hischshr1520f), abs(iwm94) < 0.6) |>
+  pull(iwm94)
+mccrary <- DCdensity(x2, cutpoint = 0, verbose = TRUE, plot = FALSE, ext.out = TRUE)
+
+# the test fits a line to the bin heights on each side of the cutoff, inside the bandwidth and with triangular weights, and compares the two lines at zero.
+# the paper draws a smoother over the whole range, I only draw these two lines
+bins2 <- mccrary$data |> filter(abs(cellmp) < 0.5)
+lines2 <- bins2 |>
+  filter(abs(cellmp) < mccrary$bw) |>
+  mutate(right = cellmp >= 0, w = 1 - abs(cellmp) / mccrary$bw)
+fig2b <- ggplot(bins2, aes(cellmp, cellval)) +
+  geom_point(colour = "grey50", size = 0.6) +
+  geom_smooth(data = lines2, aes(weight = w, group = right), method = "lm", formula = y ~ x,
+              se = FALSE, colour = "black", linewidth = 0.5) +
   geom_vline(xintercept = 0, linetype = "dashed", linewidth = 0.3) +
-  labs(title = "(b) Density test (rddensity)", x = "Islamic win margin", y = "Density") +
+  labs(title = "(b) McCrary density test", x = "Islamic win margin", y = "Density",
+       caption = paste0("Discontinuity est. = ", fmt(mccrary$theta), ", s.e. = ", fmt(mccrary$se))) +
   theme_paper()
 save_fig(fig2a + fig2b, "figure2", 7, 3)
-cat("Figure 2 (a):", nrow(raw), "municipalities with a win margin\n")
-summary(rdd)
+cat("Figure 2 (a):", nrow(raw), "municipalities with a win margin, (b):", length(x2),
+    "with the women's outcome and |margin| < 0.6\n")
 
 
 # RD plot for figures 3 and 4: bin means + linear fit with 95% CI on each side
