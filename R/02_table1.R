@@ -13,9 +13,9 @@ labels <- c(hischshr1520f = "Women 15-20 with high school, 2000",
             ageshr60 = "Population share above 60",
             sexr = "Gender ratio",
             shhs = "Household size",
-            merkezi = "District center",
-            merkezp = "Province center",
-            subbuyuk = "Sub-metro center")
+            merkezi = "District centre",
+            merkezp = "Province centre",
+            subbuyuk = "Sub-metro centre")
 
 # the difference has the classical standard error (t-test with equal variances), as in the paper
 table1 <- dat |>

@@ -3,7 +3,7 @@
 # after six years with the mayor. here I split on things fixed before 1994:
 #   poor  = below median predicted schooling of young women (lasso in py/ext_b_lasso.py)
 #   pious = above median Islamic vote share in 1994 (paper's Panel C)
-# medians are taken inside the women's window. the splits were decided before looking at the results
+# medians are taken inside the women's window
 # note: the SEs treat the groups as given, even though the lasso index is estimated
 
 source("R/00_setup.R")

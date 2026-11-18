@@ -1,7 +1,7 @@
 """Extension B: "poor" index for each municipality.
 Lasso (LassoCV, 5 folds) that predicts the high school share of women 15-20 in 2000 from things fixed before 1994.
 Trained only on municipalities without an Islamic mayor, so the prediction is the schooling we would expect without one.
-Political variables are left out so poor does not overlap with pious. Called from R/09_extension_b.R, which writes the input csv first"""
+Political variables are left out so poor does not overlap with pious. Called from R/08_extension_b.R, which writes the input csv first"""
 
 
 import pandas as pd
@@ -18,7 +18,7 @@ untreated = df["i94"] == 0
 X = df.loc[untreated, predictors]
 y = df.loc[untreated, "hischshr1520f"]
 
-# same seed as set.seed in R/00_setup.R
+# fixed seed, so the folds are the same in every run
 folds = KFold(n_splits=5, shuffle=True, random_state=20261120)
 lasso = make_pipeline(StandardScaler(), LassoCV(cv=folds))
 lasso.fit(X, y)

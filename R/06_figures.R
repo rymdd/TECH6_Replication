@@ -23,6 +23,46 @@ save_fig(fig1, "figure1", 4.5, 3.5)
 cat("Figure 1:", nrow(d1), "municipalities with vote share below 0.75,", sum(d1$close), "with |margin| < 0.02\n")
 
 
+# McCrary (2008) density test, follows DCdensity.ado from the replication package (rdd, the R version of it, is not on CRAN anymore).
+# histogram of x with a bin edge at the cutoff, then a weighted line through the bin heights on each side, compared at the cutoff
+mccrary_test <- function(x, cutoff = 0) {
+  n <- length(x)
+  b <- 2 * sd(x) / sqrt(n)  # McCrary's default bin size
+
+  # bin k goes from cutoff + k*b to cutoff + (k+1)*b, empty bins are kept with height 0
+  bin <- floor((x - cutoff) / b)
+  k <- min(bin):max(bin)
+  bins <- tibble(mid = cutoff + (k + 0.5) * b,
+                 height = tabulate(bin - min(bin) + 1, nbins = length(k)) / (n * b))
+
+  # default bandwidth: 4th order polynomial through the bin heights on each side, h from its 2nd derivative, average of the two sides
+  h_side <- c()
+  for (right in c(FALSE, TRUE)) {
+    d <- bins |> filter((mid >= cutoff) == right)
+    fit <- lm(height ~ poly(mid, 4, raw = TRUE), data = d)
+    beta <- coef(fit)
+    f2 <- 2 * beta[3] + 6 * beta[4] * d$mid + 12 * beta[5] * d$mid^2
+    h_side <- c(h_side, 3.348 * (sigma(fit)^2 * max(abs(d$mid - cutoff)) / sum(f2^2))^(1 / 5))
+  }
+  h <- mean(h_side)
+  # the ado file also adds empty bins beyond the data, they only get weight if the data ends inside the bandwidth
+  stopifnot(min(x) < cutoff - h, max(x) > cutoff + h)
+
+  # local linear fit with triangular weights on each side, the intercept is the density at the cutoff
+  fhat <- c()
+  for (right in c(FALSE, TRUE)) {
+    d <- bins |> filter((mid >= cutoff) == right, abs(mid - cutoff) < h)
+    fit <- lm(height ~ I(mid - cutoff), data = d, weights = 1 - abs(mid - cutoff) / h)
+    fhat <- c(fhat, coef(fit)[[1]])
+  }
+
+  # theta is the log difference of the two densities at the cutoff, se as in McCrary (2008)
+  theta <- log(fhat[2]) - log(fhat[1])
+  se <- sqrt(1 / (n * h) * 24 / 5 * (1 / fhat[1] + 1 / fhat[2]))
+  list(bins = bins, b = b, h = h, theta = theta, se = se, p = 2 * pnorm(-abs(theta / se)))
+}
+
+
 # Figure 2
 fig2a <- ggplot(raw, aes(iwm94)) +
   geom_histogram(aes(y = after_stat(100 * count / sum(count))),
@@ -36,15 +76,16 @@ fig2a <- ggplot(raw, aes(iwm94)) +
 x2 <- raw |>
   filter(!is.na(hischshr1520f), abs(iwm94) < 0.6) |>
   pull(iwm94)
-mccrary <- DCdensity(x2, cutpoint = 0, verbose = TRUE, plot = FALSE, ext.out = TRUE)
+mccrary <- mccrary_test(x2)
+cat("McCrary test: bin size", fmt(mccrary$b, 4), "bandwidth", fmt(mccrary$h), "estimate", fmt(mccrary$theta),
+    "s.e.", fmt(mccrary$se), "p", fmt(mccrary$p), "\n")
 
-# the test fits a line to the bin heights on each side of the cutoff, inside the bandwidth and with triangular weights, and compares the two lines at zero.
-# the paper draws a smoother over the whole range, I only draw these two lines
-bins2 <- mccrary$data |> filter(abs(cellmp) < 0.5)
+# the paper draws a smoother over the whole range, I only draw the two lines that the test compares at zero
+bins2 <- mccrary$bins |> filter(abs(mid) < 0.5)
 lines2 <- bins2 |>
-  filter(abs(cellmp) < mccrary$bw) |>
-  mutate(right = cellmp >= 0, w = 1 - abs(cellmp) / mccrary$bw)
-fig2b <- ggplot(bins2, aes(cellmp, cellval)) +
+  filter(abs(mid) < mccrary$h) |>
+  mutate(right = mid >= 0, w = 1 - abs(mid) / mccrary$h)
+fig2b <- ggplot(bins2, aes(mid, height)) +
   geom_point(colour = "grey50", size = 0.6) +
   geom_smooth(data = lines2, aes(weight = w, group = right), method = "lm", formula = y ~ x,
               se = FALSE, colour = "black", linewidth = 0.5) +
@@ -77,7 +118,7 @@ rd_plot <- function(data, v, bin_width, xlim, title = NULL) {
 # Figure 3: covariates at the cutoff
 covs3 <- c("vshr_islam1994", "ageshr60", "ageshr19", "lpop1994", "sexr", "anyc", "partycount", "shhs")
 names3 <- c("Islamic vote share", "Age 60+", "Age 19-", "Log population", "Gender ratio",
-            "Any center municipality", "Number of parties", "Household size")
+            "Any centre municipality", "Number of parties", "Household size")
 
 plots3 <- list()
 for (i in 1:8) {

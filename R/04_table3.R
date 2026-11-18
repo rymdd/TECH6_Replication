@@ -15,7 +15,10 @@ for (s in 1:2) {
     for (k in 1:5) {
       fit <- rd_reg(dat, y, bands[k], p, covs = TRUE)
       ct <- coeftable(fit)["i94", ]
-      grid[5 * (s - 1) + p + 1, k] <- paste0(fmt(ct[1]), stars(ct[4]), " (", fmt(ct[2]), ")")
+      # stars as superscripts, like in the etable tables
+      sig <- stars(ct[4])
+      grid[5 * (s - 1) + p + 1, k] <- paste0(fmt(ct[1]), if (sig != "") paste0("$^{", sig, "}$"), " (", fmt(ct[2]), ")")
+      # the windows are the same for women and men, both outcomes are complete in the sample
       n_obs[k] <- nobs(fit)
     }
   }
@@ -28,5 +31,5 @@ names(table3) <- c("", "Polynomial", paste("h =", fmt(bands, 2)))
 print(table3)
 cat("Observations in each window:", n_obs, "\n")
 
-kable(table3, format = "latex", booktabs = TRUE, align = "llccccc", linesep = c(rep("", 4), "\\addlinespace")) |>
+kable(table3, format = "latex", booktabs = TRUE, align = "llccccc", escape = FALSE, linesep = c(rep("", 4), "\\addlinespace")) |>
   writeLines("output/tables/table3.tex")

@@ -9,5 +9,8 @@ data/derived/
 # macOS
 .DS_Store
 
+# Python
+__pycache__/
+
 # The write-up is submitted separately, not through this repository
 paper/

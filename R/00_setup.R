@@ -1,11 +1,9 @@
 library(tidyverse)
 library(haven)
 library(fixest)
-library(rdd)
 library(patchwork)
 library(knitr)
 
-set.seed(20261120)
 options(scipen = 999)
 
 dir.create("data/derived", showWarnings = FALSE)
@@ -21,8 +19,6 @@ h_women <- 0.240
 h_men <- 0.323
 
 
-# RD regression from the paper: OLS inside |iwm94| < h, polynomial of order p on each side of the cutoff, optional controls + province dummies.
-# h = Inf and p = 0 gives the global OLS
 rd_window <- function(data, y, h) {
   data |>
     filter(!is.na(.data[[y]]), abs(iwm94) < h) |>
@@ -40,6 +36,8 @@ rd_rhs <- function(p, covs) {
   rhs
 }
 
+# RD regression from the paper: OLS inside |iwm94| < h, polynomial of order p on each side of the cutoff, optional controls + province dummies.
+# h = Inf and p = 0 gives the global OLS
 rd_reg <- function(data, y, h = Inf, p = 1, covs = FALSE) {
   d <- rd_window(data, y, h)
   feols(as.formula(paste(y, "~", rd_rhs(p, covs))), data = d,

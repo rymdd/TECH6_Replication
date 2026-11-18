@@ -7,8 +7,8 @@ scripts <- c("R/01_prepare_data.R",
              "R/04_table3.R",
              "R/05_table7.R",
              "R/06_figures.R",
-             "R/08_extension_a.R",
-             "R/09_extension_b.R")
+             "R/07_extension_a.R",
+             "R/08_extension_b.R")
 
 for (s in scripts) {
   cat("\n----", s, "----\n")

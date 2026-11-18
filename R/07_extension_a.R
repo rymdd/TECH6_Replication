@@ -8,7 +8,7 @@ source("R/00_setup.R")
 dat <- readRDS("data/derived/analysis.rds")
 
 # only 1609 municipalities have the 1990 census outcomes
-d90 <- dat |> filter(!is.na(c90hischshr1520f), !is.na(c90hischshr1520m))
+d90 <- dat |> filter(!is.na(c90hischshr1520f))
 dat$in_1990_sample <- as.numeric(!is.na(dat$c90hischshr1520f))
 cat("1990 sample:", nrow(d90), "municipalities,", sum(d90$i94), "with an Islamic mayor\n")
 
