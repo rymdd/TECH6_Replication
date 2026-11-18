@@ -15,7 +15,7 @@ and two extensions. Everything is in R, except the lasso in Extension B, which i
 1. Install the packages once:
 
    ```
-   Rscript -e 'install.packages(c("tidyverse", "haven", "fixest", "patchwork", "knitr"))'
+   Rscript -e 'install.packages(c("tidyverse", "haven", "fixest", "rddensity", "patchwork", "knitr"))'
    pip install -r requirements.txt
    ```
 
@@ -39,7 +39,7 @@ The write-up itself is not in this repository; it is submitted separately. It ta
 | `R/03_table2.R` | `table2_women.tex`, `table2_men.tex`; the enrolment bandwidths and the women = men test are in this script |
 | `R/04_table3.R` | `table3.tex` |
 | `R/05_table7.R` | `table7_hs1519.tex`, `table7_hs1529.tex`, `table7_nevm1519.tex`; the six Table VII bandwidths are in this script |
-| `R/06_figures.R` | `figure1`–`figure4` (PDF and PNG); prints the McCrary test and the eight covariate regressions behind Figure 3. The McCrary test, `mccrary_test()`, is written out in this script |
+| `R/06_figures.R` | `figure1`–`figure4` (PDF and PNG); prints the density test and the eight covariate regressions behind Figure 3 |
 | `R/07_extension_a.R` | `ext_a.tex`, `ext_a_cohorts` figure |
 | `R/08_extension_b.R`, `py/ext_b_lasso.py` | `ext_b.tex`; `ext_b_lasso_fit.csv` and `ext_b_lasso_coefficients.csv` from the lasso |
 
@@ -62,7 +62,7 @@ The table notes in the paper do not list household size among the controls or me
 
 - **Sample sizes, third decimals and stars.** The bandwidths are the rounded values printed in the paper, so some windows hold a few municipalities more or fewer than the paper's: 1,021 against 1,020 in the main window for women, and up to six in Table VII at half and double the bandwidth. Three estimates in Table VII differ in the third decimal, and for women aged 15–29 the stars change at half the bandwidth and at the bandwidth.
 - **Table II, women = men.** The difference between the two effects is the same as in the paper, but its standard error is not: fixest also corrects for the number of regressors and uses the t distribution, so my p-values are somewhat larger. The conclusion at the main specification is the same; with a cubic in the margin (column 8) the difference is significant at 10% instead of 5%.
-- **Figure 2 (b).** Same test and sample as the paper: McCrary's test on the 2,543 municipalities with the women's outcome and \|`iwm94`\| < 0.6. The test is written in R following `DCdensity.ado` from the replication package, since rdd, the R package with the test, is no longer on CRAN. The panel draws the two weighted lines that the test compares at the cutoff, in place of the paper's density estimate over the whole range.
+- **Figure 2 (b).** The density test is `rddensity` (from the course), not McCrary's test, and it is run on the main sample of 2,629, while the paper's do-file runs its test on the 2,543 municipalities with the women's outcome and \|`iwm94`\| < 0.6.
 - **Figure 3.** Eight separate RD regressions, one per covariate, at the women's bandwidth and without controls, in place of the paper's joint test with a bandwidth for each covariate.
 - **Figures 3 and 4.** A straight line on each side of the cutoff, in place of the paper's local linear smoother. The bins and windows are the paper's.
 - **Table I.** No significance stars and no row for the Islamic-mayor dummy; the difference has its standard error.
@@ -75,7 +75,7 @@ The table notes in the paper do not list household size among the controls or me
 
 ## Software
 
-R 4.6.2 with fixest 0.14.2, tidyverse 2.0.0 (ggplot2 4.0.4), haven 2.5.5, patchwork 1.3.2 and knitr 1.52; Python 3.11 with pandas 2.2.2 and scikit-learn 1.5.1. `output/session_info.txt` records the versions of the last run. The seed in `py/ext_b_lasso.py` fixes the cross-validation folds; nothing else is random.
+R 4.6.2 with fixest 0.14.2, rddensity 3.0, tidyverse 2.0.0 (ggplot2 4.0.4), haven 2.5.5, patchwork 1.3.2 and knitr 1.52; Python 3.11 with pandas 2.2.2 and scikit-learn 1.5.1. `output/session_info.txt` records the versions of the last run. The seed in `py/ext_b_lasso.py` fixes the cross-validation folds; nothing else is random.
 
 ## Layout
 

@@ -23,46 +23,6 @@ save_fig(fig1, "figure1", 4.5, 3.5)
 cat("Figure 1:", nrow(d1), "municipalities with vote share below 0.75,", sum(d1$close), "with |margin| < 0.02\n")
 
 
-# McCrary (2008) density test, follows DCdensity.ado from the replication package (rdd, the R version of it, is not on CRAN anymore).
-# histogram of x with a bin edge at the cutoff, then a weighted line through the bin heights on each side, compared at the cutoff
-mccrary_test <- function(x, cutoff = 0) {
-  n <- length(x)
-  b <- 2 * sd(x) / sqrt(n)  # McCrary's default bin size
-
-  # bin k goes from cutoff + k*b to cutoff + (k+1)*b, empty bins are kept with height 0
-  bin <- floor((x - cutoff) / b)
-  k <- min(bin):max(bin)
-  bins <- tibble(mid = cutoff + (k + 0.5) * b,
-                 height = tabulate(bin - min(bin) + 1, nbins = length(k)) / (n * b))
-
-  # default bandwidth: 4th order polynomial through the bin heights on each side, h from its 2nd derivative, average of the two sides
-  h_side <- c()
-  for (right in c(FALSE, TRUE)) {
-    d <- bins |> filter((mid >= cutoff) == right)
-    fit <- lm(height ~ poly(mid, 4, raw = TRUE), data = d)
-    beta <- coef(fit)
-    f2 <- 2 * beta[3] + 6 * beta[4] * d$mid + 12 * beta[5] * d$mid^2
-    h_side <- c(h_side, 3.348 * (sigma(fit)^2 * max(abs(d$mid - cutoff)) / sum(f2^2))^(1 / 5))
-  }
-  h <- mean(h_side)
-  # the ado file also adds empty bins beyond the data, they only get weight if the data ends inside the bandwidth
-  stopifnot(min(x) < cutoff - h, max(x) > cutoff + h)
-
-  # local linear fit with triangular weights on each side, the intercept is the density at the cutoff
-  fhat <- c()
-  for (right in c(FALSE, TRUE)) {
-    d <- bins |> filter((mid >= cutoff) == right, abs(mid - cutoff) < h)
-    fit <- lm(height ~ I(mid - cutoff), data = d, weights = 1 - abs(mid - cutoff) / h)
-    fhat <- c(fhat, coef(fit)[[1]])
-  }
-
-  # theta is the log difference of the two densities at the cutoff, se as in McCrary (2008)
-  theta <- log(fhat[2]) - log(fhat[1])
-  se <- sqrt(1 / (n * h) * 24 / 5 * (1 / fhat[1] + 1 / fhat[2]))
-  list(bins = bins, b = b, h = h, theta = theta, se = se, p = 2 * pnorm(-abs(theta / se)))
-}
-
-
 # Figure 2
 fig2a <- ggplot(raw, aes(iwm94)) +
   geom_histogram(aes(y = after_stat(100 * count / sum(count))),
@@ -72,30 +32,15 @@ fig2a <- ggplot(raw, aes(iwm94)) +
   labs(title = "(a) Histogram", x = "Islamic win margin", y = "Percent") +
   theme_paper()
 
-# McCrary test with the sample of the do-file: municipalities with the women's outcome and |margin| < 0.6, default bin size and bandwidth
-x2 <- raw |>
-  filter(!is.na(hischshr1520f), abs(iwm94) < 0.6) |>
-  pull(iwm94)
-mccrary <- mccrary_test(x2)
-cat("McCrary test: bin size", fmt(mccrary$b, 4), "bandwidth", fmt(mccrary$h), "estimate", fmt(mccrary$theta),
-    "s.e.", fmt(mccrary$se), "p", fmt(mccrary$p), "\n")
-
-# the paper draws a smoother over the whole range, I only draw the two lines that the test compares at zero
-bins2 <- mccrary$bins |> filter(abs(mid) < 0.5)
-lines2 <- bins2 |>
-  filter(abs(mid) < mccrary$h) |>
-  mutate(right = mid >= 0, w = 1 - abs(mid) / mccrary$h)
-fig2b <- ggplot(bins2, aes(mid, height)) +
-  geom_point(colour = "grey50", size = 0.6) +
-  geom_smooth(data = lines2, aes(weight = w, group = right), method = "lm", formula = y ~ x,
-              se = FALSE, colour = "black", linewidth = 0.5) +
+# the paper uses the McCrary test, I use rddensity from the course instead (same idea, but the test statistic is not the same as in the paper)
+rdd <- rddensity(X = dat$iwm94, c = 0)
+fig2b <- rdplotdensity(rdd, X = dat$iwm94, noPlot = TRUE)$Estplot +
   geom_vline(xintercept = 0, linetype = "dashed", linewidth = 0.3) +
-  labs(title = "(b) McCrary density test", x = "Islamic win margin", y = "Density",
-       caption = paste0("Discontinuity est. = ", fmt(mccrary$theta), ", s.e. = ", fmt(mccrary$se))) +
+  labs(title = "(b) Density test (rddensity)", x = "Islamic win margin", y = "Density") +
   theme_paper()
 save_fig(fig2a + fig2b, "figure2", 7, 3)
-cat("Figure 2 (a):", nrow(raw), "municipalities with a win margin, (b):", length(x2),
-    "with the women's outcome and |margin| < 0.6\n")
+cat("Figure 2 (a):", nrow(raw), "municipalities with a win margin\n")
+summary(rdd)
 
 
 # RD plot for figures 3 and 4: bin means + linear fit with 95% CI on each side
