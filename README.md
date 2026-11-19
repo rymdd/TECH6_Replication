@@ -1,6 +1,6 @@
 # TECH6 term paper: replication of Meyersson (2014)
 
-Balázs Dániel Biró (s242441), TECH6 Data Science and Econometrics, NHH, autumn 2026.
+Balázs Dániel Biró (Candidate no. 5), TECH6 Data Science and Econometrics, NHH, autumn 2026.
 
 Replication of Tables I, II, III and VII and Figures 1–4 of
 
